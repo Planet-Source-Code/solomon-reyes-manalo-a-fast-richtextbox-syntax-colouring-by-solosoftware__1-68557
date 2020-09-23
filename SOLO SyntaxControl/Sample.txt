@@ -1,0 +1,86 @@
+Option Explicit
+'==========================================================
+' An RTB Syntax Highlighting Control.
+' Made by solomon manalo
+'==========================================================
+Private Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long
+
+Dim ex As String
+
+Function ReadTextFileContents(filename As String) As String
+    Dim fnum As Integer, isOpen As Boolean
+    On Error GoTo Error_Handler
+    ' Get the next free file number.
+    fnum = FreeFile()
+    Open filename For Input As #fnum
+    ' If execution flow got here, the file has been open without error.
+    isOpen = True
+    ' Read the entire contents in one single operation.
+    ReadTextFileContents = Input(LOF(fnum), fnum)
+    ' Intentionally flow into the error handler to close the file.
+Error_Handler:
+    ' Raise the error (if any), but first close the file.
+    If isOpen Then Close #fnum
+    If Err Then Err.Raise Err.Number, , Err.Description
+End Function
+
+Private Sub Command1_Click()
+Unload Me: End
+End Sub
+
+Private Sub Command2_Click()
+OpenURL "http://www.solosoftware.co.nr", Me.hWnd
+End Sub
+
+Private Sub Form_Load()
+Dim nL As String
+Call InitSyntaxEditor
+
+nL = vbNewLine
+ex = "Option Explicit" & nL & _
+     "Public Const msg as Variant 'For Message Boxes" & nL & _
+     "Dim data as String" & nL & _
+     "Dim x as Double" & nL & nL & nL & _
+     "Private Sub Button1_Click()" & nL & _
+     "  s = " & Chr(34) & "Hello World!" & Chr(34) & nL & _
+     "  msg = MsgBox(s,vbYesNo + vbInformation," & Chr(34) & "Syntax" & Chr(34) & ")" & nL & _
+     "  If msg is vbYes then" & nL & _
+     "     'YES button is Clicked" & nL & _
+     "  Else" & nL & _
+     "     'NO button is Clicked" & nL & _
+     "  End if" & nL & _
+     "End Sub" & nL & _
+     "-----------------------------------------" & nL & _
+     "+ - * / \ = And Or Not Like is " & nL & _
+     "This is Normal Text"
+    
+SOLO_RTBSyntax1.Text = ex
+End Sub
+
+Public Sub InitSyntaxEditor()
+'You can change the Deafult syntax colors of this control by its
+'properties in design time, or in coding style.
+With SOLO_RTBSyntax1
+'Try to Uncomment this code...
+'===================================================
+'     .ColorOf_ReservedWords = vbRed
+'     .ColorOf_ProceduresORFunctions = vbBlue
+'     .ColorOf_Comments = vbYellow
+'     .ColorOf_Strings = vbGreen
+'===================================================
+     .Syntax_CommentChar = CommentCharacter
+     .Syntax_StringChar = StringCharacter
+     .Syntax_Delimiter = SplittingCharacter
+     .Syntax_Operators = Operators
+     .Syntax_LogicalOperators = LOperators
+     .Syntax_ReservedWords = RESERVED
+     .Syntax_ProceduresORFunctions = FUNC_OBJ
+     'Refreshes the syntax coloring always call this property
+     'when there is change in Syntaxes or Colors
+     .ReColorize
+End With
+End Sub
+
+Public Function OpenURL(urlADD As String, sourceHWND As Long)
+     Call ShellExecute(sourceHWND, vbNullString, urlADD, "", vbNullString, 1)
+End Function
